@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>미덕 퀴즈</title>
+  <style>
+    body {
+      font-family: 'Pretendard', sans-serif;
+      background-color: #fde9ef;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .meaning {
+      font-weight: bold;
+      margin: 10px 0 20px;
+      font-size: 1.2rem;
+    }
+    .word-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 10px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .word-button {
+      padding: 10px 14px;
+      border: 2px solid #ff70a6;
+      border-radius: 10px;
+      background-color: white;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+    .word-button:hover {
+      background-color: #ffe0ec;
+    }
+    .word-button.correct {
+      background-color: #d0f5c9;
+      border-color: #43aa8b;
+    }
+    .word-button.wrong {
+      background-color: #fcd3d3;
+      border-color: #ef476f;
+    }
+    .points {
+      margin-top: 30px;
+      font-size: 1.2rem;
+    }
+    .levels {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+    .level-box {
+      padding: 10px 14px;
+      border-radius: 20px;
+      background-color: white;
+      border: 2px solid #ccc;
+      font-weight: bold;
+    }
+    .current-level {
+      background-color: #ffb3d1;
+      border-color: #ff3d8b;
+    }
+  </style>
+</head>
+<body>
+  <h1>💎 미덕 퀴즈</h1>
+  <p>뜻에 맞는 미덕의 보석 단어를 골라주세요.</p>
+  <p class="meaning" id="quiz-meaning">뜻: </p>
+
+  <div class="word-grid" id="word-buttons"></div>
+
+  <div class="points">
+    ✨ 나의 미덕 포인트: <span id="points">0</span><br>
+    현재 레벨: <span id="current-level-label">🐣 병아리</span>
+  </div>
+
+  <div class="levels">
+    <div class="level-box current-level">🐣 병아리</div>
+    <div class="level-box">🌱 새싹</div>
+    <div class="level-box">🌻 꽃망울</div>
+    <div class="level-box">🦋 나비</div>
+    <div class="level-box">🦁 용감이</div>
+    <div class="level-box">💎 보석왕</div>
+  </div>
+
+  <script>
+    const virtues = [
+      { name: "감사", meaning: "고마운 마음을 표현함" },
+      { name: "겸손", meaning: "스스로를 자랑하지 않고 남을 존중함" },
+      { name: "결의", meaning: "굳게 마음을 먹음" },
+      { name: "관용", meaning: "다른 사람을 너그럽게 받아들임" },
+      { name: "근면", meaning: "부지런하고 열심히 함" },
+      { name: "기뻐함", meaning: "마음속에서 우러나오는 즐거움을 느낌" },
+      { name: "기지", meaning: "재치 있고 슬기로운 지혜" },
+      { name: "끈기", meaning: "쉽게 포기하지 않고 계속 노력함" },
+      { name: "나눔", meaning: "자신의 것을 다른 사람에게 베풂" },
+      { name: "남을 배려", meaning: "상대방의 입장에서 생각하고 도와줌" },
+      { name: "도움", meaning: "필요한 일을 하도록 거들어 줌" },
+      { name: "명예", meaning: "떳떳하고 자랑스러운 이름이나 지위" },
+      { name: "믿음직함", meaning: "믿고 맡길 수 있음" },
+      { name: "바른 행동", meaning: "예절과 규칙을 지키며 행동함" },
+      { name: "배려", meaning: "다정하고 이해심 있게 도와줌" },
+      { name: "봉사", meaning: "자발적으로 도움을 줌" },
+      { name: "사랑", meaning: "진심으로 아끼고 돌봄" },
+      { name: "사려", meaning: "남을 먼저 생각함" },
+      { name: "상냥함", meaning: "부드럽고 친절한 태도" },
+      { name: "소신", meaning: "자신의 생각을 굽히지 않음" },
+      { name: "신뢰", meaning: "믿고 의지할 수 있음" },
+      { name: "신용", meaning: "약속을 잘 지켜서 믿을 수 있음" },
+      { name: "아름다움", meaning: "보기 좋고 마음도 따뜻하게 함" },
+      { name: "안정감", meaning: "불안하지 않고 평온함" },
+      { name: "열정", meaning: "하고자 하는 마음이 강함" },
+      { name: "예의", meaning: "공손하고 바르게 행동함" },
+      { name: "우의", meaning: "친구 사이의 따뜻한 정" },
+      { name: "용기", meaning: "두려움을 이겨내고 행동함" },
+      { name: "용서", meaning: "상대의 잘못을 이해하고 풀어줌" },
+      { name: "의지", meaning: "자기 생각대로 해내는 힘" },
+      { name: "이해", meaning: "상대방을 알고 받아들임" },
+      { name: "인내", meaning: "어려움을 참고 견딤" },
+      { name: "인정", meaning: "다른 사람의 좋은 점을 받아들임" },
+      { name: "자율", meaning: "스스로 판단하고 행동함" },
+      { name: "정돈", meaning: "물건이나 공간을 가지런히 함" },
+      { name: "정의로움", meaning: "옳은 일을 실천함" },
+      { name: "정직", meaning: "거짓 없이 바르게 말하고 행동함" },
+      { name: "존중", meaning: "상대의 의견과 존재를 소중히 여김" },
+      { name: "중용", meaning: "과하지도 덜하지도 않게 조화롭게 함" },
+      { name: "지혜", meaning: "슬기롭고 현명하게 판단함" },
+      { name: "진실함", meaning: "진심으로 솔직하고 바름" },
+      { name: "책임감", meaning: "맡은 일을 끝까지 해냄" },
+      { name: "청결", meaning: "깨끗하고 정돈됨" },
+      { name: "친절", meaning: "다정하고 따뜻한 태도로 대함" },
+      { name: "충직", meaning: "믿음직스럽고 성실하게 행동함" },
+      { name: "탁월함", meaning: "다른 사람보다 훨씬 뛰어남" },
+      { name: "평온함", meaning: "마음이 고요하고 안정됨" },
+      { name: "한결같음", meaning: "처음부터 끝까지 변함이 없음" },
+      { name: "헌신", meaning: "자신을 바쳐서 도와줌" },
+      { name: "협동", meaning: "서로 도와서 함께함" },
+      { name: "확신", meaning: "틀림없이 믿는 마음" },
+      { name: "화합", meaning: "서로 사이좋게 어울림" }
+    ];
+
+    const sortedVirtues = virtues.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+
+    const wordContainer = document.getElementById("word-buttons");
+    const quizMeaning = document.getElementById("quiz-meaning");
+    const pointsDisplay = document.getElementById("points");
+    const levelLabel = document.getElementById("current-level-label");
+
+    let points = 0;
+    let currentAnswer = {};
+
+    function updateLevel() {
+      if (points >= 20) levelLabel.innerText = "💎 보석왕";
+      else if (points >= 15) levelLabel.innerText = "🦁 용감이";
+      else if (points >= 10) levelLabel.innerText = "🦋 나비";
+      else if (points >= 5) levelLabel.innerText = "🌻 꽃망울";
+      else if (points >= 1) levelLabel.innerText = "🌱 새싹";
+      else levelLabel.innerText = "🐣 병아리";
+    }
+
+    function nextQuiz() {
+      const random = virtues[Math.floor(Math.random() * virtues.length)];
+      currentAnswer = random;
+      quizMeaning.innerText = `뜻: ${random.meaning}`;
+    }
+
+    function createButtons() {
+      sortedVirtues.forEach((v) => {
+        const btn = document.createElement("button");
+        btn.innerText = v.name;
+        btn.className = "word-button";
+        btn.onclick = () => {
+          if (btn.disabled) return;
+          if (v.name === currentAnswer.name) {
+            btn.classList.add("correct");
+            points++;
+            pointsDisplay.innerText = points;
+            updateLevel();
+            setTimeout(() => {
+              btn.classList.remove("correct");
+              nextQuiz();
+            }, 1000);
+          } else {
+            btn.classList.add("wrong");
+            setTimeout(() => btn.classList.remove("wrong"), 1000);
+          }
+        };
+        wordContainer.appendChild(btn);
+      });
+    }
+
+    createButtons();
+    nextQuiz();
+  </script>
+</body>
+</html>
